@@ -1,0 +1,47 @@
+{
+    "name": "Omni Rank - All-In-One SEO Platform",
+    "short_name": "Omni Rank",
+    "description": "The ultimate All-In-One SEO & Viral Growth SaaS Platform",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0f",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "business",
+        "productivity",
+        "utilities"
+    ],
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "Keyword Research",
+            "url": "/keyword-magic",
+            "description": "Find keyword opportunities"
+        },
+        {
+            "name": "Site Audit",
+            "url": "/site-audit",
+            "description": "Run a technical SEO audit"
+        },
+        {
+            "name": "Rank Tracker",
+            "url": "/rank-tracker",
+            "description": "Track your rankings"
+        }
+    ]
+}
