@@ -2,6 +2,9 @@
 
 [![React](https://img.shields.io/badge/React-19.2.0-blue)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF)](https://vitejs.dev/)
+[![Express.js](https://img.shields.io/badge/Express.js-5.2.1-%23404d59.svg)](http://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.18-38B2AC)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -28,7 +31,7 @@ Omni Rank is a comprehensive SEO and viral growth SaaS platform that combines th
 - **Client Management**: Manage multiple client accounts
 - **Reporting**: Generate professional reports for clients
 
-## 🛠️ Technologies Used
+## 🛠️ Technologies Stack
 
 ### Frontend
 - **React 19.2.0**: Modern component-based UI framework
@@ -38,6 +41,23 @@ Omni Rank is a comprehensive SEO and viral growth SaaS platform that combines th
 - **Recharts**: Beautiful data visualization
 - **Lucide React**: Consistent iconography
 - **React Router DOM**: Client-side routing
+
+### Backend
+- **Node.js**: JavaScript runtime environment
+- **Express.js 5.2.1**: Web application framework
+- **MongoDB**: NoSQL document database
+- **Mongoose**: MongoDB object modeling
+- **JSON Web Tokens (JWT)**: Authentication mechanism
+- **bcryptjs**: Password hashing
+- **Axios**: HTTP client for API requests
+- **Cheerio**: Server-side HTML parsing (for web scraping)
+
+### Development & Utilities
+- **Dotenv**: Environment variable management
+- **CORS**: Cross-Origin Resource Sharing
+- **Express Async Handler**: Simplified async error handling
+- **Nodemon**: Automatic server restart during development
+- **Concurrently**: Run multiple commands simultaneously
 
 ### Styling & UX
 - **Glassmorphism Design**: Modern glass-like UI elements
@@ -59,33 +79,50 @@ The platform features a comprehensive dashboard with:
 ## 🏗️ Project Structure
 
 ```
-src/
-├── components/         # Reusable UI components
-│   ├── Header.jsx
-│   └── Sidebar.jsx
-├── pages/             # Feature-specific pages
-│   ├── Dashboard.jsx
-│   ├── KeywordMagic.jsx
-│   ├── BacklinkMiner.jsx
-│   ├── CompetitorGap.jsx
-│   ├── RankTracker.jsx
-│   ├── SiteAudit.jsx
-│   ├── TrendSurfer.jsx
-│   ├── ViralLoop.jsx
-│   ├── PressRelease.jsx
-│   ├── AIOptimization.jsx
-│   ├── VoiceSearch.jsx
-│   └── AgencyMode.jsx
-├── App.jsx            # Main application component
-├── main.jsx           # Application entry point
-├── index.css          # Global styles and custom properties
-└── assets/            # Static assets
+├── public/              # Static assets
+├── src/                 # Frontend source code
+│   ├── assets/          # Images, icons, and static files
+│   ├── components/      # Reusable UI components
+│   │   ├── Header.jsx
+│   │   └── Sidebar.jsx
+│   ├── pages/           # Feature-specific pages
+│   │   ├── Dashboard.jsx
+│   │   ├── KeywordMagic.jsx
+│   │   ├── BacklinkMiner.jsx
+│   │   ├── CompetitorGap.jsx
+│   │   ├── RankTracker.jsx
+│   │   ├── SiteAudit.jsx
+│   │   ├── TrendSurfer.jsx
+│   │   ├── ViralLoop.jsx
+│   │   ├── PressRelease.jsx
+│   │   ├── AIOptimization.jsx
+│   │   ├── VoiceSearch.jsx
+│   │   └── AgencyMode.jsx
+│   ├── App.jsx          # Main application component
+│   ├── main.jsx         # Application entry point
+│   └── index.css        # Global styles and custom properties
+├── server/              # Backend source code
+│   ├── config/          # Configuration files
+│   │   └── db.js        # Database connection
+│   ├── controllers/     # Request handlers
+│   ├── middleware/      # Custom middleware
+│   ├── models/          # Mongoose schemas
+│   │   └── User.js      # User model
+│   ├── routes/          # API route definitions
+│   │   ├── authRoutes.js
+│   │   └── toolRoutes.js
+│   └── index.js         # Server entry point
+├── .env.example         # Environment variables template
+├── package.json         # Dependencies and scripts
+├── vite.config.js       # Vite configuration
+└── README.md
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18.x or later
+- MongoDB (local installation or cloud Atlas)
 - npm or yarn package manager
 
 ### Installation
@@ -101,25 +138,54 @@ cd omni-rank
 npm install
 ```
 
-3. Start the development server:
-```bash
-npm run dev
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following:
+```env
+NODE_ENV=development
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. Start the development servers:
+```bash
+# Run frontend and backend concurrently
+npm run dev:all
+```
+
+Or run them separately:
+```bash
+# Terminal 1: Start frontend
+npm run dev
+
+# Terminal 2: Start backend
+npm run server
+```
+
+5. Open your browser and navigate to `http://localhost:5173`
 
 ### Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Lint code with ESLint
+- `npm run dev`: Start frontend development server with hot reload
+- `npm run server`: Start backend server with nodemon
+- `npm run dev:all`: Start both frontend and backend concurrently
+- `npm run build`: Build frontend for production
+- `npm run preview`: Preview production build locally
+- `npm run lint`: Lint code with ESLint
 
-## 🔧 Configuration
+## 🔧 API Endpoints
 
-The project uses Vite for bundling and development. Configuration can be found in `vite.config.js`.
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user info
 
-Tailwind CSS is configured with custom Omni Rank theme colors and utility classes in `src/index.css`.
+### SEO Tools
+- `POST /api/tools/audit` - Perform site audit
+- `POST /api/tools/keywords` - Get keyword suggestions
+- `POST /api/tools/rank` - Check keyword rankings
+
+All protected routes require JWT authentication in the Authorization header.
 
 ## 🎨 Design System
 
@@ -177,6 +243,7 @@ If you encounter any issues or have questions, please file an issue on the GitHu
 - Charts by Recharts
 - Styling with Tailwind CSS
 - Animations by Framer Motion
+- Powered by Node.js and MongoDB
 
 ---
 
