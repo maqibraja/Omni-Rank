@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     PieChart, Pie, Cell, ResponsiveContainer
@@ -149,8 +150,8 @@ function TreeNode({ node, depth = 0 }) {
                     <div className="w-4" />
                 )}
                 <div className={`w-2 h-2 rounded-full ${depth === 0 ? 'bg-indigo-500' :
-                        depth === 1 ? 'bg-cyan-500' :
-                            'bg-emerald-500'
+                    depth === 1 ? 'bg-cyan-500' :
+                        'bg-emerald-500'
                     }`} />
                 <span className="text-sm text-slate-300">{node.name}</span>
                 <span className="text-xs text-slate-500">{node.url}</span>
@@ -180,28 +181,59 @@ export default function SiteAudit() {
     const [hasResults, setHasResults] = useState(false)
     const [selectedTab, setSelectedTab] = useState('all')
     const [expandedRow, setExpandedRow] = useState(null)
+    const [results, setResults] = useState([])
+    const { token } = useContext(AuthContext)
 
+    // Simulating progress while fetching
     useEffect(() => {
-        if (isCrawling) {
+        if (isCrawling && crawlProgress < 90) {
             const interval = setInterval(() => {
-                setCrawlProgress(prev => {
-                    if (prev >= 100) {
-                        setIsCrawling(false)
-                        setHasResults(true)
-                        return 100
-                    }
-                    return prev + Math.random() * 15
-                })
+                setCrawlProgress(prev => Math.min(prev + Math.random() * 10, 90))
             }, 500)
             return () => clearInterval(interval)
         }
-    }, [isCrawling])
+    }, [isCrawling, crawlProgress])
 
-    const handleStartCrawl = () => {
+    const handleStartCrawl = async () => {
         if (!siteUrl) return
         setCrawlProgress(0)
         setIsCrawling(true)
         setHasResults(false)
+
+        try {
+            const res = await fetch('http://localhost:5000/api/tools/audit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ url: siteUrl })
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                // Transform single page result into array for table
+                setResults([{
+                    id: 1,
+                    url: data.url,
+                    type: 'page',
+                    status: 200,
+                    issues: data.issues,
+                    pageSpeed: Math.floor(Math.random() * 40) + 60, // Mock speed for now as backend doesn't do speed test
+                    wordCount: data.stats.links * 50 // Rough estimate
+                }])
+                setCrawlProgress(100)
+                setHasResults(true)
+            } else {
+                alert(data.message)
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Failed to connect to server')
+        } finally {
+            setIsCrawling(false)
+        }
     }
 
     const getStatusColor = (status) => {
@@ -385,8 +417,8 @@ export default function SiteAudit() {
                                                 key={tab}
                                                 onClick={() => setSelectedTab(tab)}
                                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${selectedTab === tab
-                                                        ? 'bg-indigo-500 text-white'
-                                                        : 'text-slate-400 hover:text-white hover:bg-[#1a1a25]'
+                                                    ? 'bg-indigo-500 text-white'
+                                                    : 'text-slate-400 hover:text-white hover:bg-[#1a1a25]'
                                                     }`}
                                             >
                                                 {tab}
@@ -398,8 +430,75 @@ export default function SiteAudit() {
                                     </button>
                                 </div>
 
-                                {/* Results Table */}
-                                <div className="overflow-x-auto">
+                                {/* Mobile: Card View */}
+                                <div className="md:hidden divide-y divide-[#2e2e3a]">
+                                    {results.map((result) => (
+                                        <div key={result.id} className="p-4 space-y-4">
+                                            <div className="flex items-start justify-between">
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <FileText className="w-4 h-4 text-slate-500 shrink-0" />
+                                                        <span className="font-medium text-white truncate text-sm">{result.url}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`text-xs font-bold ${getStatusColor(result.status)}`}>
+                                                            Status: {result.status}
+                                                        </span>
+                                                        <span className={`text-xs flex items-center gap-1 ${getSpeedColor(result.pageSpeed)}`}>
+                                                            <Gauge className="w-3 h-3" />
+                                                            {result.pageSpeed}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => setExpandedRow(expandedRow === result.id ? null : result.id)}
+                                                    className="p-2 rounded-lg hover:bg-[#1a1a25] text-slate-400"
+                                                >
+                                                    <motion.div animate={{ rotate: expandedRow === result.id ? 90 : 0 }}>
+                                                        <ChevronRight className="w-5 h-5" />
+                                                    </motion.div>
+                                                </button>
+                                            </div>
+
+                                            {expandedRow === result.id && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    className="space-y-2 pt-2"
+                                                >
+                                                    {result.issues.length > 0 ? result.issues.map((issue, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`flex items-center gap-3 p-3 rounded-lg ${issue.type === 'error' ? 'bg-red-500/10' :
+                                                                issue.type === 'warning' ? 'bg-amber-500/10' :
+                                                                    'bg-cyan-500/10'
+                                                                }`}
+                                                        >
+                                                            {issue.type === 'error' ? (
+                                                                <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                                                            ) : issue.type === 'warning' ? (
+                                                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                                                            ) : (
+                                                                <AlertCircle className="w-4 h-4 text-cyan-400 shrink-0" />
+                                                            )}
+                                                            <span className="text-xs text-slate-300">
+                                                                {issue.message}
+                                                            </span>
+                                                        </div>
+                                                    )) : (
+                                                        <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-xs font-medium">
+                                                            <CheckCircle className="w-4 h-4" />
+                                                            All checks passed!
+                                                        </div>
+                                                    )}
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Desktop: Results Table */}
+                                <div className="hidden md:block overflow-x-auto">
                                     <table className="table-dark">
                                         <thead>
                                             <tr>
@@ -412,11 +511,10 @@ export default function SiteAudit() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {crawlResults.map((result) => (
-                                                <>
+                                            {results.map((result) => (
+                                                <React.Fragment key={result.id}>
                                                     <tr
-                                                        key={result.id}
-                                                        className="cursor-pointer"
+                                                        className="cursor-pointer group"
                                                         onClick={() => setExpandedRow(expandedRow === result.id ? null : result.id)}
                                                     >
                                                         <td>
@@ -485,8 +583,8 @@ export default function SiteAudit() {
                                                                                 <div
                                                                                     key={idx}
                                                                                     className={`flex items-center gap-3 p-3 rounded-lg ${issue.type === 'error' ? 'bg-red-500/10' :
-                                                                                            issue.type === 'warning' ? 'bg-amber-500/10' :
-                                                                                                'bg-cyan-500/10'
+                                                                                        issue.type === 'warning' ? 'bg-amber-500/10' :
+                                                                                            'bg-cyan-500/10'
                                                                                         }`}
                                                                                 >
                                                                                     {issue.type === 'error' ? (
@@ -507,7 +605,7 @@ export default function SiteAudit() {
                                                             </motion.tr>
                                                         )}
                                                     </AnimatePresence>
-                                                </>
+                                                </React.Fragment>
                                             ))}
                                         </tbody>
                                     </table>

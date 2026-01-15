@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
@@ -44,13 +45,33 @@ export default function KeywordMagic() {
     const [sortBy, setSortBy] = useState('volume')
     const [sortOrder, setSortOrder] = useState('desc')
 
-    const handleSearch = () => {
+    const { token } = useContext(AuthContext)
+
+    const handleSearch = async () => {
         if (!searchQuery.trim()) return
         setIsLoading(true)
-        setTimeout(() => {
+        try {
+            const res = await fetch('http://localhost:5000/api/tools/keywords', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ query: searchQuery })
+            })
+            const data = await res.json()
+            if (res.ok) {
+                setKeywords(data)
+                setHasSearched(true)
+            } else {
+                alert('Error fetching keywords')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Server error')
+        } finally {
             setIsLoading(false)
-            setHasSearched(true)
-        }, 1500)
+        }
     }
 
     const toggleStar = (id) => {

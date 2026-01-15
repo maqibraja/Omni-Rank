@@ -1,14 +1,16 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Menu, Search, Bell, User, Settings, LogOut, Moon, Globe,
     ChevronDown, Zap, HelpCircle, X
 } from 'lucide-react'
+import AuthContext from '../context/AuthContext'
 
 export default function Header({ toggleSidebar, isMobile, sidebarOpen }) {
     const [showNotifications, setShowNotifications] = useState(false)
     const [showProfile, setShowProfile] = useState(false)
     const [showSearch, setShowSearch] = useState(false)
+    const { user, logout } = useContext(AuthContext)
     const notificationRef = useRef(null)
     const profileRef = useRef(null)
     const searchInputRef = useRef(null)
@@ -162,9 +164,9 @@ export default function Header({ toggleSidebar, isMobile, sidebarOpen }) {
                         className="flex items-center gap-2 p-1.5 md:p-2 md:pr-3 rounded-xl hover:bg-[#1a1a25] transition-colors"
                     >
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
-                            J
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <span className="hidden md:block text-sm font-medium text-white">John</span>
+                        <span className="hidden md:block text-sm font-medium text-white">{user?.name || 'User'}</span>
                         <ChevronDown className="hidden md:block w-4 h-4 text-slate-400" />
                     </button>
 
@@ -178,10 +180,10 @@ export default function Header({ toggleSidebar, isMobile, sidebarOpen }) {
                                 className="absolute right-0 top-14 w-56 glass-card rounded-xl overflow-hidden shadow-2xl"
                             >
                                 <div className="p-4 border-b border-[#2e2e3a]">
-                                    <p className="font-semibold text-white">John Doe</p>
-                                    <p className="text-xs text-slate-400 truncate">john@example.com</p>
+                                    <p className="font-semibold text-white">{user?.name}</p>
+                                    <p className="text-xs text-slate-400 truncate">{user?.email}</p>
                                     <div className="mt-2 flex items-center gap-2">
-                                        <span className="badge badge-primary">Pro Plan</span>
+                                        <span className="badge badge-primary">{user?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}</span>
                                     </div>
                                 </div>
                                 <div className="py-2">
@@ -200,7 +202,10 @@ export default function Header({ toggleSidebar, isMobile, sidebarOpen }) {
                                     ))}
                                 </div>
                                 <div className="p-2 border-t border-[#2e2e3a]">
-                                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors">
+                                    <button
+                                        onClick={logout}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    >
                                         <LogOut className="w-4 h-4" />
                                         Sign Out
                                     </button>

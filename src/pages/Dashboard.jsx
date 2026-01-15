@@ -1,3 +1,4 @@
+import { useContext } from 'react'
 import { motion } from 'framer-motion'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -9,6 +10,7 @@ import {
     Search, Zap, FileText, BarChart3, ArrowRight, Flame,
     Users, Eye, Target
 } from 'lucide-react'
+import AuthContext from '../context/AuthContext'
 
 const trafficData = [
     { name: 'Mar', organic: 4000, paid: 2400, direct: 1800 },
@@ -69,7 +71,7 @@ function StatCard({ icon: Icon, label, value, change, changeType, color }) {
                     <Icon className="w-5 h-5 md:w-6 md:h-6" style={{ color }} />
                 </div>
                 <div className={`flex items-center gap-1 text-xs md:text-sm ${changeType === 'up' ? 'text-emerald-400' :
-                        changeType === 'down' ? 'text-red-400' : 'text-slate-400'
+                    changeType === 'down' ? 'text-red-400' : 'text-slate-400'
                     }`}>
                     {changeType === 'up' && <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />}
                     {changeType === 'down' && <TrendingDown className="w-3 h-3 md:w-4 md:h-4" />}
@@ -85,6 +87,7 @@ function StatCard({ icon: Icon, label, value, change, changeType, color }) {
 }
 
 export default function Dashboard() {
+    const { user } = useContext(AuthContext)
     return (
         <motion.div
             variants={containerVariants}
@@ -96,7 +99,7 @@ export default function Dashboard() {
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 flex-wrap">
-                        Welcome back, John! <span className="text-2xl">👋</span>
+                        Welcome back, {user?.name || 'Member'}! <span className="text-2xl">👋</span>
                     </h1>
                     <p className="text-slate-400 text-sm md:text-base mt-1">
                         Here's your SEO performance today.
